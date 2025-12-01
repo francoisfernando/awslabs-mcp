@@ -263,10 +263,13 @@ mcp = None
 
 def create_server():
     """Create and configure the MCP server instance."""
+    # https://github.com/jlowin/fastmcp/issues/873#issuecomment-3366072242
     return FastMCP(
         'awslabs.aws-dataprocessing-mcp-server',
         instructions=SERVER_INSTRUCTIONS,
         dependencies=SERVER_DEPENDENCIES,
+        host="0.0.0.0",
+        port=3000
     )
 
 
@@ -291,6 +294,12 @@ def main():
     )
 
     args = parser.parse_args()
+    import os
+
+    logger.info("environment variables:")
+    for key, value in os.environ.items():
+         logger.info(f"{key}: {value}")
+
 
     allow_write = args.allow_write
     allow_sensitive_data_access = args.allow_sensitive_data_access
@@ -375,7 +384,7 @@ def main():
     CommonResourceHandler(mcp, allow_write=allow_write)
 
     # Run server
-    mcp.run()
+    mcp.run(transport="streamable-http")
 
     return mcp
 
